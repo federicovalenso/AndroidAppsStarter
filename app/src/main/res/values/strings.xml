@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">AppsStarter</string>
+    <string name="btnAddText">Add</string>
+    <string name="btnDelText">Delete</string>
+    <string name="label_app">App</string>
+    <string name="label_time">Time</string>
+    <string name="btnSaveText">Save</string>
+</resources>
