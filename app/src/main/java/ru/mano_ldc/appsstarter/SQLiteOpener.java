@@ -10,12 +10,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public final class SQLiteOpener extends SQLiteOpenHelper {
 
-    public static final String APP_ID = "id";
-    public static final String APP_NAME_COL = "name";
-    public static final String APP_PACKAGE_COL = "package";
-    public static final String APP_START_TIME = "startTime";
-    public static String APPS_TABLE = "applications";
-
     public SQLiteOpener(Context context) {
         super(context, "AppsScheduler", null, 1);
     }
@@ -28,10 +22,12 @@ public final class SQLiteOpener extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("" +
-                "CREATE TABLE " + APPS_TABLE + " (" +
-                APP_ID + " INTEGER PRIMARY KEY autoincrement," +
-                APP_NAME_COL + " TEXT," +
-                APP_PACKAGE_COL + " TEXT," +
-                APP_START_TIME + " TEXT);");
+                "CREATE TABLE " + ApplicationsScheduler.SCHEDULE_TABLE + " (" +
+                ApplicationsScheduler.APP_ID + " INTEGER PRIMARY KEY autoincrement," +
+                ApplicationsScheduler.TYPE + " TEXT," +
+                ApplicationsScheduler.FILE_NAME + " TEXT," +
+                ApplicationsScheduler.APP_NAME + " TEXT," +
+                ApplicationsScheduler.APP_PACKAGE + " TEXT," +
+                ApplicationsScheduler.APP_START_TIME + " INTEGER);");
     }
 }

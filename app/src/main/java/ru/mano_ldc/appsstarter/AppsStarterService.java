@@ -4,14 +4,22 @@ import android.app.Notification;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.IBinder;
+import android.widget.Toast;
 
+import java.io.File;
+import java.text.ParseException;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class AppsStarterService extends Service {
 
+    final String JPG_TYPE = "jpg";
+    final String AVI_TYPE = "avi";
+    final String MKV_TYPE = "mkv";
+    ScheduledElement curScheduledElement;
     Notification notification;
     ApplicationsScheduler scheduler;
     Timer AppsStarterTimer;
@@ -24,6 +32,7 @@ public class AppsStarterService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        curScheduledElement = new ScheduledElement();
         Notification.Builder notifBuilder = new Notification.Builder(this);
         notifBuilder.setAutoCancel(false);
         notifBuilder.setTicker("Сервис запуска приложений");
@@ -87,10 +96,47 @@ public class AppsStarterService extends Service {
         taskForAppsStarterTimer = new TimerTask() {
             @Override
             public void run() {
-                ScheduledApp app = scheduler.getAppByTime(System.currentTimeMillis());
-                if (app != null) {
-                    Intent intent = getPackageManager().getLaunchIntentForPackage(app.getPackage());
-                    startActivity(intent);
+                ScheduledElement scheduledElement = null;
+                try {
+                    scheduledElement = scheduler.getScheduledElementByTime(System.currentTimeMillis());
+                }
+                catch (ParseException e) {
+                    Toast.makeText(getApplicationContext(), e.getMessage().toString(), Toast.LENGTH_LONG).show();;
+                }
+                if (scheduledElement != null) {
+                    String type = scheduledElement.getType();
+                    switch (type) {
+                        case ApplicationsScheduler.TYPE_APP : {
+                            if (curScheduledElement.getPackage().equals(scheduledElement.getPackage())) {
+                                break;
+                            }
+                            Intent intent = getPackageManager().getLaunchIntentForPackage(scheduledElement.getPackage());
+                            startActivity(intent);
+                            break;
+                        }
+                        case ApplicationsScheduler.TYPE_FILE : {
+                            if (curScheduledElement.getFileName().equals(scheduledElement.getFileName())) {
+                                break;
+                            }
+                            Intent intent = new Intent(Intent.ACTION_VIEW);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            String fileName = scheduledElement.getFileName();
+                            File file = new File(fileName);
+                            String Extension = fileName.substring(fileName.lastIndexOf('.')+1);
+                            switch (Extension) {
+                                case JPG_TYPE :
+                                    intent.setDataAndType(Uri.fromFile(file), "image/*");
+                                    break;
+                                case AVI_TYPE :
+                                case MKV_TYPE :
+                                    intent.setDataAndType(Uri.fromFile(file), "video/*");
+                                    break;
+                            }
+                            startActivity(intent);
+                            break;
+                        }
+                    }
+                    curScheduledElement = scheduledElement;
                 }
             }
         };

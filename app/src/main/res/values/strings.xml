@@ -5,4 +5,7 @@
     <string name="label_app">App</string>
     <string name="label_time">Time</string>
     <string name="btnSaveText">Save</string>
+    <string name="btnChooseFile">Choose file</string>
+    <string name="label_file">File</string>
+    <string name="label_type">Type</string>
 </resources>

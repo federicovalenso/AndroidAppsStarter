@@ -5,14 +5,13 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.NonNull;
 import android.text.format.DateFormat;
-import android.util.ArrayMap;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * Created by valera on 21.11.2017.
@@ -20,11 +19,31 @@ import java.util.List;
 
 public final class ApplicationsScheduler {
 
+    public static final String TYPE_FILE ="File";
+    public static final String TYPE_APP ="App";
+    public static final String APP_ID = "id";
+    public static final String TYPE = "type";
+    public static final String FILE_NAME = "file_name";
+    public static final String APP_NAME = "name";
+    public static final String APP_PACKAGE = "package";
+    public static final String APP_START_TIME = "startTime";
+    public static String SCHEDULE_TABLE = "schedule";
     public static final String[] columns = {
-            SQLiteOpener.APP_ID,
-            SQLiteOpener.APP_NAME_COL,
-            SQLiteOpener.APP_PACKAGE_COL,
-            SQLiteOpener.APP_START_TIME};
+            APP_ID,
+            TYPE,
+            FILE_NAME,
+            APP_NAME,
+            APP_PACKAGE,
+            APP_START_TIME};
+    @NonNull
+    public static String millisToTimeString(String time) {
+        return DateFormat.format("HH.mm", Long.parseLong(time)).toString();
+    }
+
+    @NonNull
+    public static String millisToTimeString(long time) {
+        return DateFormat.format("HH.mm", time).toString();
+    }
 
     private ArrayList<HashMap<String, String>> scheduledAppsList = new ArrayList<>();
     private SQLiteDatabase db;
@@ -36,7 +55,7 @@ public final class ApplicationsScheduler {
         if (db == null) {
             throw new SQLException("Не удаётся подключиться к локальной базе данных...");
         }
-        updateAppsList();
+        updateScheduleList();
     }
 
     @Override
@@ -44,20 +63,34 @@ public final class ApplicationsScheduler {
         db.close();
     }
 
-    private void updateAppsList() {
+    private void updateScheduleList() {
         scheduledAppsList.clear();
-        Cursor c = db.query(SQLiteOpener.APPS_TABLE, columns, null, null, null, null, SQLiteOpener.APP_START_TIME);
+        Cursor c = db.query(SCHEDULE_TABLE, columns, null, null, null, null, APP_START_TIME);
 
         if (c.getCount() != 0) {
             while (c.moveToNext() == true) {
                 HashMap<String, String> map = new HashMap<>();
                 for (String curCol : columns) {
-                    map.put(curCol, c.getString(c.getColumnIndex(curCol)));
+                    if (curCol == APP_START_TIME) {
+                        map.put(curCol, millisToTimeString(c.getString(c.getColumnIndex(curCol))));
+                    }
+                    else {
+                        map.put(curCol, c.getString(c.getColumnIndex(curCol)));
+                    }
                 }
                 scheduledAppsList.add(map);
             }
         }
     }
+
+    private long getMillisFromDayStart(long time) throws ParseException {
+        String timeString = millisToTimeString(time);
+        return timeStringToMillis(timeString);
+    }
+
+    private long timeStringToMillis(String time) throws ParseException {
+        return new SimpleDateFormat("HH.mm").parse(time).getTime();
+    };
 
     public String[] getColumnsForAdapter() {
         return columns;
@@ -69,9 +102,9 @@ public final class ApplicationsScheduler {
 
     public HashMap<String, String> getAppByID(String id) throws SQLException {
         HashMap<String, String> result = new HashMap<>();
-        String selection = SQLiteOpener.APP_ID + " = ?";
+        String selection = APP_ID + " = ?";
         String[] selectionArgs = new String[] {id};
-        Cursor c = db.query(SQLiteOpener.APPS_TABLE, columns, selection, selectionArgs, null, null, null);
+        Cursor c = db.query(SCHEDULE_TABLE, columns, selection, selectionArgs, null, null, null);
         if (c.moveToFirst() == true) {
             for (String curCol : columns) {
                 result.put(curCol, c.getString(c.getColumnIndex(curCol)));
@@ -83,45 +116,80 @@ public final class ApplicationsScheduler {
         return result;
     }
 
-    public ScheduledApp getAppByTime(long time) {
-        ScheduledApp app = null;
-        String timeString = DateFormat.format("HH:mm", time).toString();
-        String selection = SQLiteOpener.APP_START_TIME + " = ?";
-        String[] selectionArgs = new String[] {timeString};
-        String[] selectionCols = new String[] {
-                SQLiteOpener.APP_NAME_COL,
-                SQLiteOpener.APP_PACKAGE_COL,
-                SQLiteOpener.APP_START_TIME};
-        Cursor c = db.query(SQLiteOpener.APPS_TABLE, selectionCols, selection, selectionArgs,null, null, null);
+    public ScheduledElement getScheduledElementByTime(String time) throws ParseException {
+        return getScheduledElementByTime(timeStringToMillis(time));
+    }
+
+    public ScheduledElement getScheduledElementByTime(long time) throws ParseException {
+        ScheduledElement scheduledElement = null;
+        String selection = APP_START_TIME + " <= ?";
+        String[] selectionArgs = new String[] { Long.toString(getMillisFromDayStart(time)) };
+        Cursor c = db.query(SCHEDULE_TABLE, columns, selection, selectionArgs,null, null, APP_START_TIME + " DESC");
         if (c.moveToFirst() == true) {
-            app = new ScheduledApp(
-                    c.getString(c.getColumnIndex(SQLiteOpener.APP_NAME_COL)),
-                    c.getString(c.getColumnIndex(SQLiteOpener.APP_PACKAGE_COL)),
-                    c.getShort(c.getColumnIndex(SQLiteOpener.APP_START_TIME)));
+            scheduledElement = new ScheduledElement(
+                    c.getString(c.getColumnIndex(TYPE)),
+                    c.getString(c.getColumnIndex(APP_NAME)),
+                    c.getString(c.getColumnIndex(APP_PACKAGE)),
+                    c.getString(c.getColumnIndex(FILE_NAME)),
+                    c.getShort(c.getColumnIndex(APP_START_TIME)));
         }
-        return app;
+        return scheduledElement;
     }
 
     public void addApp(String appName, String appPackage, String time) throws Exception {
-        ContentValues cv = new ContentValues();
-        cv.put(SQLiteOpener.APP_NAME_COL, appName);
-        cv.put(SQLiteOpener.APP_PACKAGE_COL, appPackage);
-        cv.put(SQLiteOpener.APP_START_TIME, time);
-        if (db.insert(SQLiteOpener.APPS_TABLE, null, cv) == -1) {
-            throw new SQLException("Не удаётся добавить приложение в расписание...");
-        }
-        updateAppsList();
+        addApp(appName, appPackage, timeStringToMillis(time));
     }
 
-    public void updateApp(String id, String appName, String appPackage, String time) throws SQLException {
+    public void addApp(String appName, String appPackage, long time) throws Exception {
         ContentValues cv = new ContentValues();
-        cv.put(SQLiteOpener.APP_ID, id);
-        cv.put(SQLiteOpener.APP_NAME_COL, appName);
-        cv.put(SQLiteOpener.APP_PACKAGE_COL, appPackage);
-        cv.put(SQLiteOpener.APP_START_TIME, time);
-        int updRowsCount = db.update(SQLiteOpener.APPS_TABLE, cv, SQLiteOpener.APP_ID + " = ?", new String[] {id});
+        cv.put(TYPE, TYPE_APP);
+        cv.put(APP_NAME, appName);
+        cv.put(APP_PACKAGE, appPackage);
+        cv.put(APP_START_TIME, time);
+        if (db.insert(SCHEDULE_TABLE, null, cv) == -1) {
+            throw new SQLException("Не удаётся добавить приложение в расписание...");
+        }
+        updateScheduleList();
+    }
+
+    public void addFile(String fileName, String time) throws ParseException {
+        addFile(fileName, timeStringToMillis(time));
+    }
+
+    public void addFile(String fileName, long time) {
+        ContentValues cv = new ContentValues();
+        cv.put(TYPE, TYPE_FILE);
+        cv.put(FILE_NAME, fileName);
+        cv.put(APP_START_TIME, time);
+        if (db.insert(SCHEDULE_TABLE, null, cv) == -1) {
+            throw new SQLException("Не удалось добавить файл в расписание...");
+        }
+
+    }
+
+    public void updateApp(String id, String appName, String appPackage, String time) throws SQLException, ParseException {
+        ContentValues cv = new ContentValues();
+        cv.put(APP_ID, id);
+        cv.put(APP_NAME, appName);
+        cv.put(APP_PACKAGE, appPackage);
+        cv.put(FILE_NAME, "");
+        cv.put(APP_START_TIME, timeStringToMillis(time));
+        int updRowsCount = db.update(SCHEDULE_TABLE, cv, APP_ID + " = ?", new String[] {id});
         if (updRowsCount == 0) {
             throw new SQLException("Ошибка обновления данных. Пакет: " + appPackage);
+        }
+    }
+
+    public void updateFile(String id, String fileName, String time) throws SQLException, ParseException {
+        ContentValues cv = new ContentValues();
+        cv.put(APP_ID, id);
+        cv.put(APP_NAME, "");
+        cv.put(APP_PACKAGE, "");
+        cv.put(FILE_NAME, fileName);
+        cv.put(APP_START_TIME, timeStringToMillis(time));
+        int updRowsCount = db.update(SCHEDULE_TABLE, cv, APP_ID + " = ?", new String[] {id});
+        if (updRowsCount == 0) {
+            throw new SQLException("Ошибка обновления данных. Файл: " + fileName);
         }
     }
 

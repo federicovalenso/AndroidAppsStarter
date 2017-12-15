@@ -7,6 +7,33 @@
     tools:context="ru.mano_ldc.appsstarter.AppsSchedulerEditor">
 
     <LinearLayout
+        android:id="@+id/llTypeRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10sp"
+        android:orientation="horizontal"
+        android:weightSum="10">
+
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="@string/label_type"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="24sp" />
+
+        <Spinner
+            android:id="@+id/typeChooser"
+            style="@android:style/Widget.Spinner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="4" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/llAppRow"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10sp"
@@ -24,12 +51,41 @@
 
         <Spinner
             android:id="@+id/appChooser"
+            style="@android:style/Widget.Spinner"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="8" />
+            android:layout_weight="8"
+            android:nextFocusDown="@id/etTime" />
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/llFileRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="10">
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="@string/label_file"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="24sp" />
+
+        <EditText
+            android:id="@+id/etFile"
+            style="@android:style/Widget.AutoCompleteTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="8"
+            android:inputType="textPersonName" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/llTimeRow"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10sp"
@@ -47,10 +103,13 @@
 
         <EditText
             android:id="@+id/etTime"
+            style="@android:style/Widget.AutoCompleteTextView"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="2"
-            android:inputType="date" />
+            android:enabled="true"
+            android:inputType="date"
+            android:nextFocusDown="@id/btnSave" />
 
     </LinearLayout>
 
@@ -62,11 +121,11 @@
 
         <Button
             android:id="@+id/btnSave"
-            style="?attr/buttonBarPositiveButtonStyle"
+            style="@android:style/Widget.Button"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@android:color/holo_blue_bright"
+            android:nextFocusUp="@id/etTime"
             android:text="@string/btnSaveText"
             android:textColorLink="@android:color/black"
             android:textStyle="bold" />

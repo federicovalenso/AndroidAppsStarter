@@ -14,17 +14,31 @@
         android:textSize="24sp" />
 
     <TextView
+        android:id="@+id/appRowType"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="10"
+        android:textSize="24sp" />
+
+    <TextView
         android:id="@+id/appRowName"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="45"
+        android:layout_weight="25"
         android:textSize="24sp" />
 
     <TextView
         android:id="@+id/appRowPackage"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="45"
+        android:layout_weight="25"
+        android:textSize="24sp" />
+
+    <TextView
+        android:id="@+id/appRowFile"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="30"
         android:textSize="24sp" />
 
     <TextView
