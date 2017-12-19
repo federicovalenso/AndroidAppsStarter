@@ -125,8 +125,20 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:nextFocusRight="@id/btnDelete"
             android:nextFocusUp="@id/etTime"
             android:text="@string/btnSaveText"
+            android:textColorLink="@android:color/black"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btnDelete"
+            style="@android:style/Widget.Button"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:nextFocusLeft="@id/btnSave"
+            android:text="@string/btnDeleteText"
             android:textColorLink="@android:color/black"
             android:textStyle="bold" />
 

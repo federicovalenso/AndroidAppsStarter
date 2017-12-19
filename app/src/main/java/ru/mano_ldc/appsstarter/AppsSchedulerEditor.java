@@ -1,6 +1,7 @@
 package ru.mano_ldc.appsstarter;
 
 import android.content.Intent;
+import android.database.SQLException;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -78,6 +79,7 @@ public class AppsSchedulerEditor extends AppCompatActivity implements View.OnCli
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_apps_scheduler_editor);
         findViewById(R.id.btnSave).setOnClickListener(this);
+        findViewById(R.id.btnDelete).setOnClickListener(this);
         llAppRow = findViewById(R.id.llAppRow);
         llFileRow = findViewById(R.id.llFileRow);
         ArrayAdapter<String> typeChooserAdapter = new ArrayAdapter<String>(
@@ -212,6 +214,16 @@ public class AppsSchedulerEditor extends AppCompatActivity implements View.OnCli
                 catch (Exception e) {
                     Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
                 }
+            case R.id.btnDelete :
+                String id = editableApp.get(ApplicationsScheduler.APP_ID);
+                try {
+                    scheduler.deleteByID(id);
+                    startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                }
+                catch (SQLException e) {
+                    Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+                break;
         }
     }
 

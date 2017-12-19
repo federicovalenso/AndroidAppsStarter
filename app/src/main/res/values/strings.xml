@@ -8,4 +8,5 @@
     <string name="btnChooseFile">Choose file</string>
     <string name="label_file">File</string>
     <string name="label_type">Type</string>
+    <string name="btnDeleteText">Delete</string>
 </resources>

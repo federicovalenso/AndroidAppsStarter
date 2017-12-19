@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
         });
-        //startService(new Intent(this, AppsStarterService.class));
+        startService(new Intent(this, AppsStarterService.class));
     }
 
     @Override

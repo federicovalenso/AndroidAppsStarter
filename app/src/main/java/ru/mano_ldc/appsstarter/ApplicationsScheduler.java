@@ -125,6 +125,9 @@ public final class ApplicationsScheduler {
         String selection = APP_START_TIME + " <= ?";
         String[] selectionArgs = new String[] { Long.toString(getMillisFromDayStart(time)) };
         Cursor c = db.query(SCHEDULE_TABLE, columns, selection, selectionArgs,null, null, APP_START_TIME + " DESC");
+        if (c.getCount() == 0) {
+            c = db.query(SCHEDULE_TABLE, columns, APP_START_TIME + " > ?", selectionArgs,null, null, APP_START_TIME + " DESC");
+        }
         if (c.moveToFirst() == true) {
             scheduledElement = new ScheduledElement(
                     c.getString(c.getColumnIndex(TYPE)),
@@ -190,6 +193,13 @@ public final class ApplicationsScheduler {
         int updRowsCount = db.update(SCHEDULE_TABLE, cv, APP_ID + " = ?", new String[] {id});
         if (updRowsCount == 0) {
             throw new SQLException("Ошибка обновления данных. Файл: " + fileName);
+        }
+    }
+
+    public void deleteByID(String id) throws SQLException {
+        int delCount = db.delete(SCHEDULE_TABLE, APP_ID + " = ?", new String[] {id});
+        if (delCount == 0) {
+            throw new SQLException("Не удалось удалить элемент с id:" + id);
         }
     }
 
