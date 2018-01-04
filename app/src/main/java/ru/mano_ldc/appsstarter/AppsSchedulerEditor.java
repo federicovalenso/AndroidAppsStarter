@@ -1,6 +1,7 @@
 package ru.mano_ldc.appsstarter;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.SQLException;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +15,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.nbsp.materialfilepicker.MaterialFilePicker;
 import com.nbsp.materialfilepicker.ui.FilePickerActivity;
 
 import java.util.HashMap;
@@ -110,7 +112,9 @@ public class AppsSchedulerEditor extends AppCompatActivity implements View.OnCli
         etFile = findViewById(R.id.etFile);
         etFile.setOnClickListener(mFileClickListener);
         etTime = findViewById(R.id.etTime);
-        //etTime.setOnClickListener(mTimeClickListener);
+        if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN)) {
+            etTime.setOnClickListener(mTimeClickListener);
+        }
         scheduler = new ApplicationsScheduler(getApplicationContext());
         Intent intent = getIntent();
         action = intent.getAction();

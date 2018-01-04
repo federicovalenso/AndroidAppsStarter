@@ -126,7 +126,7 @@ public final class ApplicationsScheduler {
         String[] selectionArgs = new String[] { Long.toString(getMillisFromDayStart(time)) };
         Cursor c = db.query(SCHEDULE_TABLE, columns, selection, selectionArgs,null, null, APP_START_TIME + " DESC");
         if (c.getCount() == 0) {
-            c = db.query(SCHEDULE_TABLE, columns, APP_START_TIME + " > ?", selectionArgs,null, null, APP_START_TIME + " DESC");
+            c = db.query(SCHEDULE_TABLE, columns, null, null,null, null, APP_START_TIME + " DESC");
         }
         if (c.moveToFirst() == true) {
             scheduledElement = new ScheduledElement(

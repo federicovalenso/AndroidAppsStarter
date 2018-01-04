@@ -101,43 +101,60 @@ public class AppsStarterService extends Service {
                     scheduledElement = scheduler.getScheduledElementByTime(System.currentTimeMillis());
                 }
                 catch (ParseException e) {
-                    Toast.makeText(getApplicationContext(), e.getMessage().toString(), Toast.LENGTH_LONG).show();;
+                    Toast.makeText(getApplicationContext(), e.getMessage().toString(), Toast.LENGTH_LONG).show();
                 }
-                if (scheduledElement != null) {
-                    String type = scheduledElement.getType();
-                    switch (type) {
-                        case ApplicationsScheduler.TYPE_APP : {
-                            if (curScheduledElement.getPackage().equals(scheduledElement.getPackage())) {
+                if (scheduledElement == null) {
+                    return;
+                }
+                String type = scheduledElement.getType();
+                switch (type) {
+                    case ApplicationsScheduler.TYPE_APP : {
+                        String curPackage = curScheduledElement.getPackage();
+                        if (curPackage != null) {
+                            if (curPackage.equals(scheduledElement.getPackage())) {
                                 break;
                             }
-                            Intent intent = getPackageManager().getLaunchIntentForPackage(scheduledElement.getPackage());
-                            startActivity(intent);
-                            break;
                         }
-                        case ApplicationsScheduler.TYPE_FILE : {
-                            if (curScheduledElement.getFileName().equals(scheduledElement.getFileName())) {
-                                break;
+                        Intent intent = getPackageManager().getLaunchIntentForPackage(scheduledElement.getPackage());
+                        if (intent == null) {
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                                intent = getPackageManager().getLeanbackLaunchIntentForPackage(scheduledElement.getPackage());
                             }
-                            Intent intent = new Intent(Intent.ACTION_VIEW);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            String fileName = scheduledElement.getFileName();
-                            File file = new File(fileName);
-                            String Extension = fileName.substring(fileName.lastIndexOf('.')+1);
-                            switch (Extension) {
-                                case JPG_TYPE :
-                                    intent.setDataAndType(Uri.fromFile(file), "image/*");
-                                    break;
-                                case AVI_TYPE :
-                                case MKV_TYPE :
-                                    intent.setDataAndType(Uri.fromFile(file), "video/*");
-                                    break;
-                            }
-                            startActivity(intent);
-                            break;
                         }
+                        if (intent == null) {
+                            Toast.makeText(getApplicationContext(), "Не удаётся запустить приложение", Toast.LENGTH_LONG).show();
+                        }
+                        else {
+                            startActivity(intent);
+                        }
+                        break;
                     }
-                    curScheduledElement = scheduledElement;
+                    case ApplicationsScheduler.TYPE_FILE : {
+                        String curFileName = curScheduledElement.getFileName();
+                        if (curFileName != null) {
+                            if (curFileName.equals(scheduledElement.getFileName())) {
+                                break;
+                            }
+                        }
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        String fileName = scheduledElement.getFileName();
+                        File file = new File(fileName);
+                        String Extension = fileName.substring(fileName.lastIndexOf('.')+1);
+                        switch (Extension) {
+                            case JPG_TYPE :
+                                intent.setDataAndType(Uri.fromFile(file), "image/*");
+                                break;
+                            case AVI_TYPE :
+                            case MKV_TYPE :
+                                intent.setDataAndType(Uri.fromFile(file), "video/*");
+                                break;
+                        }
+                        startActivity(intent);
+                        break;
+                    }
                 }
+                curScheduledElement = scheduledElement;
             }
         };
         AppsStarterTimer.schedule(taskForAppsStarterTimer, 0, timerInterval);
