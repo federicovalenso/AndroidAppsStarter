@@ -2,6 +2,7 @@ package ru.mano_ldc.appsstarter;
 
 import android.app.Notification;
 import android.app.Service;
+import android.support.annotation.NonNull;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;

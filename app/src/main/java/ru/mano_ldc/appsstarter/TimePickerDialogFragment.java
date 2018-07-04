@@ -41,7 +41,7 @@ public class TimePickerDialogFragment extends DialogFragment implements TimePick
      */
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-        EditText etTime =  getActivity().findViewById(R.id.etTime);
+        EditText etTime =  (EditText) getActivity().findViewById(R.id.etTime);
         String time = DateFormat.format("HH.mm", new Date(0,0, 0, hourOfDay, minute)).toString();
         etTime.setText(time);
     }

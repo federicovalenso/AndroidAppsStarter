@@ -82,8 +82,8 @@ public class AppsSchedulerEditor extends AppCompatActivity implements View.OnCli
         setContentView(R.layout.activity_apps_scheduler_editor);
         findViewById(R.id.btnSave).setOnClickListener(this);
         findViewById(R.id.btnDelete).setOnClickListener(this);
-        llAppRow = findViewById(R.id.llAppRow);
-        llFileRow = findViewById(R.id.llFileRow);
+        llAppRow = (LinearLayout) findViewById(R.id.llAppRow);
+        llFileRow = (LinearLayout) findViewById(R.id.llFileRow);
         ArrayAdapter<String> typeChooserAdapter = new ArrayAdapter<String>(
                 this,
                 R.layout.type_chooser_row,
@@ -91,7 +91,7 @@ public class AppsSchedulerEditor extends AppCompatActivity implements View.OnCli
                         ApplicationsScheduler.TYPE_FILE,
                         ApplicationsScheduler.TYPE_APP}
                         );
-        typeChooser = findViewById(R.id.typeChooser);
+        typeChooser = (Spinner) findViewById(R.id.typeChooser);
         typeChooser.setAdapter(typeChooserAdapter);
         typeChooser.setOnItemSelectedListener(mTypeChooserListener);
         InstalledApps installedApps = new InstalledApps(this);
@@ -107,11 +107,11 @@ public class AppsSchedulerEditor extends AppCompatActivity implements View.OnCli
                 R.layout.app_chooser_row,
                 from,
                 to);
-        appChooser = findViewById(R.id.appChooser);
+        appChooser = (Spinner) findViewById(R.id.appChooser);
         appChooser.setAdapter(appChooserAdapter);
-        etFile = findViewById(R.id.etFile);
+        etFile = (EditText) findViewById(R.id.etFile);
         etFile.setOnClickListener(mFileClickListener);
-        etTime = findViewById(R.id.etTime);
+        etTime = (EditText) findViewById(R.id.etTime);
         if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN)) {
             etTime.setOnClickListener(mTimeClickListener);
         }

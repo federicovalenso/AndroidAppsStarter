@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         appsScheduler = new ApplicationsScheduler(this);
 
         ArrayList<HashMap<String, String>> apps = appsScheduler.getApps();
-        lwApps = findViewById(R.id.appsList);
+        lwApps = (ListView) findViewById(R.id.appsList);
         String[] from = appsScheduler.getColumnsForAdapter();
         @IdRes int to[] = {
                 R.id.appRowID,
@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 LinearLayout clickedRow = (LinearLayout) view;
-                TextView appRowID = clickedRow.findViewById(R.id.appRowID);
+                TextView appRowID = (TextView) clickedRow.findViewById(R.id.appRowID);
                 String appID = appRowID.getText().toString();
                 if (appID.isEmpty() == false) {
                     Intent intent = new Intent(getApplicationContext(), AppsSchedulerEditor.class);
