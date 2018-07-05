@@ -2,26 +2,21 @@ package ru.mano_ldc.appsstarter;
 
 import android.app.Notification;
 import android.app.Service;
-import android.support.annotation.NonNull;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.os.IBinder;
-import android.util.Log;
+import android.support.v4.content.FileProvider;
 import android.widget.Toast;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.text.ParseException;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class AppsStarterService extends Service {
 
-    final String SERVICE_TAG = "service log";
     final String JPG_TYPE = "jpg";
     final String AVI_TYPE = "avi";
     final String MKV_TYPE = "mkv";
@@ -94,45 +89,6 @@ public class AppsStarterService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private boolean isExternalStorageReadable() {
-        String state = Environment.getExternalStorageState();
-        if ( Environment.MEDIA_MOUNTED.equals( state ) ||
-                Environment.MEDIA_MOUNTED_READ_ONLY.equals( state ) ) {
-            return true;
-        }
-        return false;
-    }
-
-    private void appendLog(String text)
-    {
-        if (isExternalStorageReadable() == false) {
-            return;
-        }
-        File logFile = new File("sdcard/appsStarter.log");
-        if (!logFile.exists())
-        {
-            try
-            {
-                logFile.createNewFile();
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-        }
-        try
-        {
-            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
-            buf.append(text);
-            buf.newLine();
-            buf.close();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
-
     private void startAppsByTimer() {
         appsStarterTimer = new Timer();
         if (taskForAppsStarterTimer != null) {
@@ -162,7 +118,7 @@ public class AppsStarterService extends Service {
                         String curPackage = curScheduledElement.getPackage();
                         if (curPackage != null) {
                             if (curPackage.equals(scheduledElement.getPackage())) {
-                                appendLog(ApplicationsScheduler.millisToTimeString(System.currentTimeMillis()) + ": текущее приложение уже запущено: " + scheduledElement.getPackage());
+                                FileAndLogUtils.appendLog(ApplicationsScheduler.millisToTimeString(System.currentTimeMillis()) + ": текущее приложение уже запущено: " + scheduledElement.getPackage());
                                 break;
                             }
                         }
@@ -173,11 +129,11 @@ public class AppsStarterService extends Service {
                             }
                         }
                         if (intent == null) {
-                            appendLog(ApplicationsScheduler.millisToTimeString(System.currentTimeMillis()) + ": Не удаётся запустить приложение");
+                            FileAndLogUtils.appendLog(ApplicationsScheduler.millisToTimeString(System.currentTimeMillis()) + ": Не удаётся запустить приложение");
                             Toast.makeText(getApplicationContext(), "Не удаётся запустить приложение", Toast.LENGTH_LONG).show();
                         }
                         else {
-                            appendLog(ApplicationsScheduler.millisToTimeString(System.currentTimeMillis()) + ": запущено приложение: " + scheduledElement.getPackage());
+                            FileAndLogUtils.appendLog(ApplicationsScheduler.millisToTimeString(System.currentTimeMillis()) + ": запущено приложение: " + scheduledElement.getPackage());
                             startActivity(intent);
                         }
                         break;
@@ -186,26 +142,34 @@ public class AppsStarterService extends Service {
                         String curFileName = curScheduledElement.getFileName();
                         if (curFileName != null) {
                             if (curFileName.equals(scheduledElement.getFileName())) {
-                                appendLog(ApplicationsScheduler.millisToTimeString(System.currentTimeMillis()) + ": текущий файл уже запущен " + scheduledElement.getFileName());
+                                FileAndLogUtils.appendLog(ApplicationsScheduler.millisToTimeString(System.currentTimeMillis()) + ": текущий файл уже запущен " + scheduledElement.getFileName());
                                 break;
                             }
                         }
                         Intent intent = new Intent(Intent.ACTION_VIEW);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                         String fileName = scheduledElement.getFileName();
                         File file = new File(fileName);
                         String Extension = fileName.substring(fileName.lastIndexOf('.')+1);
+                        Uri uri = FileProvider.getUriForFile(getApplicationContext(), BuildConfig.APPLICATION_ID + ".provider",file);
                         switch (Extension) {
                             case JPG_TYPE :
-                                intent.setDataAndType(Uri.fromFile(file), "image/*");
+                                intent.setDataAndType(uri, "image/*");
                                 break;
                             case AVI_TYPE :
                             case MKV_TYPE :
-                                intent.setDataAndType(Uri.fromFile(file), "video/*");
+                                intent.setDataAndType(uri, "video/*");
                                 break;
                         }
-                        appendLog(ApplicationsScheduler.millisToTimeString(System.currentTimeMillis()) + ": открыт файл: " + scheduledElement.getFileName());
-                        startActivity(intent);
+                        try {
+                            startActivity(intent);
+                        }
+                        catch (Exception e) {
+                            FileAndLogUtils.appendLog(ApplicationsScheduler.millisToTimeString(System.currentTimeMillis()) +
+                                    ": не удалось открыть файл: " + scheduledElement.getFileName() + ", ошибка: " + e.getMessage());
+                        }
+                        FileAndLogUtils.appendLog(ApplicationsScheduler.millisToTimeString(System.currentTimeMillis()) + ": открыт файл: " + scheduledElement.getFileName());
                         break;
                     }
                 }

@@ -1,9 +1,11 @@
 package ru.mano_ldc.appsstarter;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
@@ -53,7 +55,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
         });
-        startService(new Intent(this, AppsStarterService.class));
+        ComponentName name = startService(new Intent(this, AppsStarterService.class));
+        Log.d("MainAct", name.toString());
     }
 
     @Override

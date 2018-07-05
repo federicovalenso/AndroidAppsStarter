@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.SQLException;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
@@ -15,7 +16,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.nbsp.materialfilepicker.MaterialFilePicker;
 import com.nbsp.materialfilepicker.ui.FilePickerActivity;
 
 import java.util.HashMap;
@@ -40,7 +40,7 @@ public class AppsSchedulerEditor extends AppCompatActivity implements View.OnCli
         public void onClick(View v) {
             Intent intent = new Intent(AppsSchedulerEditor.this, FilePickerActivity.class);
             intent.putExtra(FilePickerActivity.ARG_CLOSEABLE, true);
-            intent.putExtra(FilePickerActivity.ARG_START_PATH, "/");
+            intent.putExtra(FilePickerActivity.ARG_START_PATH, Environment.getExternalStorageDirectory().toString());
             startActivityForResult(intent, 1);
         }
     };
